@@ -84,6 +84,26 @@ app.get('/info', (req, res) => {
   )
 })
 
+app.put('/api/persons/:id', (req, res, next) => {
+  const body = req.body
+
+  const person = {
+    name: body.name,
+    number: body.number
+  }
+
+  Person.findByIdAndUpdate(req.params.id, person, {new: true})
+    .then(updatedPerson => {
+      if ( !updatedPerson ) {
+        err = new Error('No person to update')
+        err.name = 'IdRemoved'
+        throw err
+      }
+      res.json(updatedPerson)
+    })
+    .catch(error => next(error))
+})
+
 const unknownEndpoint = (req, res) => {
   res.status(404).send({ error: 'unknown endpoint' })
 }
@@ -95,6 +115,9 @@ const errorHandler = (error, req, res, next) => {
 
   if (error.name === 'CastError') {
     return res.status(400).send({ error: 'malformatted id' })
+  }
+  if (error.name === 'IdRemoved') {
+    return res.status(400).send({ error: 'No such id to update with'})
   }
   next(error)
 }
