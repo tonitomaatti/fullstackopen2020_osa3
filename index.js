@@ -29,15 +29,16 @@ app.get('/api/persons', (req, res) => {
   })
 })
 
-app.get('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id)
-  const person = persons.find(p => p.id === id)
-
-  if (person) {
-    res.json(person)  
-  } else {
-    res.status(404).end()
-  }
+app.get('/api/persons/:id', (req, res, next) => {
+  Person.findById(req.params.id)
+    .then(person => {
+      if (person) {
+        res.json(person)
+      } else {
+        res.status(404).end()
+      }
+    })
+    .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (req, res, next) => {
@@ -57,20 +58,10 @@ app.post('/api/persons', (req, res) => {
     })
   }
 
-  /*
-  if (persons.find(p => p.name === body.name)) {
-    return res.status(400).json({
-      error: 'Name must be unique'
-    })
-  }
-  */
-
   const person =  new Person({
     name : body.name,
     number: body.number,
   })
-  
-  //persons = persons.concat(person)
   
   person.save().then(savedPerson => {
     res.json(savedPerson)
@@ -78,10 +69,12 @@ app.post('/api/persons', (req, res) => {
 })
 
 app.get('/info', (req, res) => {
-  res.send(
-    `<p>Phonebook has info for ${persons.length} people</p>
-    <p>${Date()}</p>`
-  )
+  Person.countDocuments({})
+    .then(count => {
+      res.send(
+      `<p>Phonebook has info for ${count} people</p>
+      <p>${Date()}</p>` )
+    })
 })
 
 app.put('/api/persons/:id', (req, res, next) => {
