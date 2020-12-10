@@ -1,4 +1,4 @@
-const { response } = require('express')
+/* eslint-disable no-undef */
 require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
@@ -6,7 +6,7 @@ const cors = require('cors')
 const Person = require('./models/person')
 
 
-morgan.token('body' , (req, res) => {
+morgan.token('body', (req) => {
   return JSON.stringify(req.body)
 })
 
@@ -43,7 +43,7 @@ app.get('/api/persons/:id', (req, res, next) => {
 
 app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndRemove(req.params.id)
-    .then(result => {
+    .then(() => {
       res.status(204).end()
     })
     .catch(error => next(error))
@@ -52,23 +52,23 @@ app.delete('/api/persons/:id', (req, res, next) => {
 app.post('/api/persons', (req, res, next) => {
   const body = req.body
 
-  const person =  new Person({
-    name : body.name,
+  const person = new Person({
+    name: body.name,
     number: body.number,
   })
-  
+
   person.save().then(savedPerson => {
     res.json(savedPerson)
   })
-  .catch(error => next(error))
+    .catch(error => next(error))
 })
 
 app.get('/info', (req, res) => {
   Person.countDocuments({})
     .then(count => {
       res.send(
-      `<p>Phonebook has info for ${count} people</p>
-      <p>${Date()}</p>` )
+        `<p>Phonebook has info for ${count} people</p>
+      <p>${Date()}</p>`)
     })
 })
 
@@ -80,9 +80,9 @@ app.put('/api/persons/:id', (req, res, next) => {
     number: body.number
   }
 
-  Person.findByIdAndUpdate(req.params.id, person, {new: true})
+  Person.findByIdAndUpdate(req.params.id, person, { new: true })
     .then(updatedPerson => {
-      if ( !updatedPerson ) {
+      if (!updatedPerson) {
         err = new Error('No person to update')
         err.name = 'IdRemoved'
         throw err
@@ -105,10 +105,10 @@ const errorHandler = (error, req, res, next) => {
     return res.status(400).send({ error: 'malformatted id' })
   }
   if (error.name === 'IdRemoved') {
-    return res.status(400).send({ error: 'No such id to update with'})
+    return res.status(400).send({ error: 'No such id to update with' })
   }
   if (error.name === 'ValidationError') {
-    return res.status(400).json({error: error.message})
+    return res.status(400).json({ error: error.message })
   }
   next(error)
 }
